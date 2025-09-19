@@ -1,40 +1,42 @@
-# Compiler
+# Compiler settings
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I./src
+CXXFLAGS = -std=c++17 -Wall -Wextra
 
 # Directories
-SRC_DIR = src
 BUILD_DIR = build
-TARGET = main
+BIN_DIR = bin
 
-# Find all source files in SRC_DIR with .cpp or .cc extensions
-SRCS := $(shell find $(SRC_DIR) -type f \( -name '*.cpp' -o -name '*.cc' \))
-# Corresponding object files in BUILD_DIR
-OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(SRCS:.cpp=.o))
-OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.cc=.o))
+# User must provide a source directory
+SRC ?=
+
+# Target name = same as source directory name (basename)
+TARGET = $(BIN_DIR)/$(notdir $(SRC))
+
+# Find sources inside chosen SRC dir
+SRCS := $(wildcard $(SRC)/*.cpp $(SRC)/*.cc)
+OBJS := $(patsubst $(SRC)/%, $(BUILD_DIR)/$(notdir $(SRC))/%,$(SRCS:.cpp=.o))
+OBJS := $(patsubst $(SRC)/%, $(BUILD_DIR)/$(notdir $(SRC))/%,$(OBJS:.cc=.o))
 
 # Default target
-all: $(BUILD_DIR) $(TARGET)
+all: $(TARGET)
 
-# Link the executable
+# Link final binary
 $(TARGET): $(OBJS)
+	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-# Compile source files to object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+# Compile source files
+$(BUILD_DIR)/$(notdir $(SRC))/%.o: $(SRC)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(SRC) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc
+$(BUILD_DIR)/$(notdir $(SRC))/%.o: $(SRC)/%.cc
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(SRC) -c $< -o $@
 
-# Create build directory
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-
-# Clean build artifacts
+# Clean everything generated
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
 .PHONY: all clean
+

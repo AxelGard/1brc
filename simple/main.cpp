@@ -8,10 +8,9 @@
 #include <string>
 #include <vector>
 
-#define FASTIO                   \
-    std::ios::sync_with_stdio(false); \
-    std::cin.tie(nullptr);            \
-    std::cout.tie(nullptr);           \
+#define FASTIO              \
+    std::cin.tie(nullptr);  \
+    std::cout.tie(nullptr); \
     std::cout.precision(11)
 
 std::vector<std::string> split(std::string s, char delimiter)
