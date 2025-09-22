@@ -1,15 +1,52 @@
+#include <algorithm>
 #include <cassert>
-#include <cstddef>
+#include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <cstring>
+#include <unordered_map>
+#include <vector>
 
+#define FASTIO              \
+    std::cin.tie(nullptr);  \
+    std::cout.tie(nullptr); \
+    std::cout.precision(11)
+
+std::vector<std::string> split(std::string s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token = "";
+    for (char c : s)
+    {
+        if (c == delimiter)
+        {
+            tokens.push_back(token);
+            token = "";
+        }
+        else
+        {
+            token += c;
+        }
+    }
+    tokens.push_back(token);
+
+    return tokens;
+}
+
+struct Result {
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::min();
+    float sum = 0.0;
+    int count = 0;
+};
 
 int main(int argc, char *argv[])
 {
+    FASTIO;
     assert(argc == 2);
 
     char *FILENAME = argv[1];
@@ -18,44 +55,48 @@ int main(int argc, char *argv[])
     if (fp == NULL)
         exit(EXIT_FAILURE);
 
+    std::unordered_map<std::string, Result*> results = {};
+
     char *line = NULL;
     size_t len = 0;
-    float min = std::numeric_limits<float>::max();
-    float max = std::numeric_limits<float>::min();
-    float mean = 0.0;
-    int row_count = 0;
+
     while ((getline(&line, &len, fp)) != -1)
     {
-        int i = strlen(line) - 2;
-        
-        std::string token = "";
-        while(i > 0)
+        auto v = split(std::string(line), ';');
+        assert(v.size() == 2);
+        std::string place = v[0];
+        if (results.find(place) == results.end())
         {
-            if (line[i] == ';') 
-            {
-                break;
-            }
-            token = line[i] + token;
-            i--; 
+            results[place] = new Result();
         }
-        float deg = std::stof(token);
-        if (deg > max)
+        Result* r = results[place];
+
+        float deg = std::stof(v[1]);
+        if (deg > r->max)
         {
-            max = deg;
+            r->max = deg;
         }
-        else if (deg < min)
+        if (deg < r->min)
         {
-            min = deg;
+            r->min = deg;
         }
-        mean += deg;
-        row_count++;
+        r->sum += deg;
+        r->count++;
     }
-    row_count--;
 
     fclose(fp);
     if (line)
         free(line);
 
-    std::cout << min << "/" << mean / row_count << "/" << max << std::endl;
+
+    std::cout << std::fixed;
+    std::cout << std::setprecision(2);
+    std::cout<< "{" << std::endl;
+    for (const auto&[place, r] : results)
+    {
+        std::cout << place << " = "<< r->min << "/" << r->sum / r->count << "/" << r->max << "," << std::endl;
+        delete r; 
+    }
+    std::cout<< "}" << std::endl;
     return 0;
 }
