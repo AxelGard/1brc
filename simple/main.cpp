@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -34,6 +36,13 @@ std::vector<std::string> split(std::string s, char delimiter)
     return tokens;
 }
 
+struct Result {
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::min();
+    float sum = 0.0;
+    int count = 0;
+};
+
 int main(int argc, char *argv[])
 {
     FASTIO;
@@ -45,35 +54,48 @@ int main(int argc, char *argv[])
     if (fp == NULL)
         exit(EXIT_FAILURE);
 
+    std::map<std::string, Result*> results = {};
+
     char *line = NULL;
     size_t len = 0;
-    float min = std::numeric_limits<float>::max();
-    float max = std::numeric_limits<float>::min();
-    float mean = 0.0;
-    int row_count = 0;
 
     while ((getline(&line, &len, fp)) != -1)
     {
         auto v = split(std::string(line), ';');
         assert(v.size() == 2);
         std::string place = v[0];
+        if (results.find(place) == results.end())
+        {
+            results[place] = new Result();
+        }
+        Result* r = results[place];
+
         float deg = std::stof(v[1]);
-        if (deg > max)
+        if (deg > r->max)
         {
-            max = deg;
+            r->max = deg;
         }
-        if (deg < min)
+        if (deg < r->min)
         {
-            min = deg;
+            r->min = deg;
         }
-        mean += deg;
-        row_count++;
+        r->sum += deg;
+        r->count++;
     }
 
     fclose(fp);
     if (line)
         free(line);
 
-    std::cout << min << "/" << mean / row_count << "/" << max << std::endl;
+
+    std::cout << std::fixed;
+    std::cout << std::setprecision(2);
+    std::cout<< "{" << std::endl;
+    for (const auto&[place, r] : results)
+    {
+        std::cout << place << " = "<< r->min << "/" << r->sum / r->count << "/" << r->max << "," << std::endl;
+        delete r; 
+    }
+    std::cout<< "}" << std::endl;
     return 0;
 }
