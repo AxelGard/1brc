@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #define FASTIO              \
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
     if (fp == NULL)
         exit(EXIT_FAILURE);
 
-    std::map<std::string, Result*> results = {};
+    std::unordered_map<std::string, Result*> results = {};
 
     char *line = NULL;
     size_t len = 0;
