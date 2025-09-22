@@ -1,5 +1,6 @@
 bin/*
-./weather_stations.csv
+weather_stations.csv
+measurements.txt
 
 
 # Prerequisites
