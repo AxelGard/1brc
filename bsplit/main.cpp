@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #define FASTIO              \
@@ -16,15 +17,22 @@
     std::cout.tie(nullptr); \
     std::cout.precision(11)
 
-std::vector<std::string> split(std::string s, char delimiter)
+struct Result {
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::min();
+    float sum = 0.0;
+    int count = 0;
+};
+
+std::pair<std::string, float> split(std::string s, char delimiter)
 {
-    std::vector<std::string> tokens;
+    std::pair<std::string, float> tokens = {};
     std::string token = "";
     for (char c : s)
     {
         if (c == delimiter)
         {
-            tokens.push_back(token);
+            tokens.first = token;
             token = "";
         }
         else
@@ -32,17 +40,10 @@ std::vector<std::string> split(std::string s, char delimiter)
             token += c;
         }
     }
-    tokens.push_back(token);
-
+    tokens.second = std::stof(token);
     return tokens;
 }
 
-struct Result {
-    float min = std::numeric_limits<float>::max();
-    float max = std::numeric_limits<float>::min();
-    float sum = 0.0;
-    int count = 0;
-};
 
 int main(int argc, char *argv[])
 {
@@ -63,15 +64,14 @@ int main(int argc, char *argv[])
     while ((getline(&line, &len, fp)) != -1)
     {
         auto v = split(std::string(line), ';');
-        assert(v.size() == 2);
-        std::string place = v[0];
+        std::string place = v.first;
         if (results.find(place) == results.end())
         {
             results[place] = new Result();
         }
         Result* r = results[place];
 
-        float deg = std::stof(v[1]);
+        float deg = v.second; 
         if (deg > r->max)
         {
             r->max = deg;
